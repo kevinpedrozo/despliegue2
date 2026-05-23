@@ -48,8 +48,9 @@
         }
 
         header p {
-            color: var(--texto-mutado);
+            color: var(--texto-mutated);
             font-size: 1.1rem;
+            color: var(--texto-mutado);
         }
 
         /* Contenedor Flexbox para las Tarjetas */
@@ -83,7 +84,7 @@
             height: 200px;
             background-size: cover;
             background-position: center;
-            background-color: #334155; /* Fallback por si no carga la imagen */
+            background-color: #334155;
         }
 
         .car-info {
@@ -99,11 +100,10 @@
         }
 
         .car-info p {
-            color: var(--texto-mutated);
+            color: var(--texto-mutado);
             font-size: 0.95rem;
             line-height: 1.5;
             margin-bottom: 1.5rem;
-            color: var(--texto-mutado);
         }
 
         .btn-elegir {
@@ -125,16 +125,19 @@
             color: #fff;
         }
 
-        /* Feedback flotante para la selección */
+        /* Cuadro de resultado estético (reemplaza el error verde) */
         #resultado {
             margin-top: 2rem;
-            padding: 1rem 2rem;
+            padding: 1.2rem 2rem;
             border-radius: 8px;
-            background-color: #16a34a;
-            color: white;
+            background-color: #065f46;
+            color: #a7f3d0;
+            border: 1px solid #047857;
             font-weight: 500;
+            max-width: 600px;
+            text-align: center;
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.4s ease;
         }
 
         @keyframes fadeIn {
@@ -147,7 +150,7 @@
 
     <header>
         <h1>Garaje <span>Premium</span></h1>
-        <p>Selecciona el auto de tus sueños para ver sus especificaciones</p>
+        <p>Selecciona el auto de tus sueños para procesar tu elección en el servidor</p>
     </header>
 
     <main class="catalogo">
@@ -183,25 +186,36 @@
 
     <script>
         function seleccionarCarro(nombreCarro) {
-            // Enviamos la selección al backend de PHP de manera asíncrona (Fetch API)
-            fetch('lógica.php', {
+            // El fetch ahora apunta a logica.php sin tilde para evitar el error 404
+            fetch('logica.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: 'carro=' + encodeURIComponent(nombreCarro)
             })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.text();
+            })
             .then(data => {
                 const alertDiv = document.getElementById('resultado');
                 alertDiv.innerText = data;
                 alertDiv.style.display = 'block';
                 
-                // Auto scroll suave hacia la confirmación
+                // Desplazamiento suave hacia la respuesta
                 alertDiv.scrollIntoView({ behavior: 'smooth' });
             })
             .catch(error => {
                 console.error('Error:', error);
+                const alertDiv = document.getElementById('resultado');
+                alertDiv.innerText = 'Hubo un problema al conectar con el servidor.';
+                alertDiv.style.backgroundColor = '#991b1b';
+                alertDiv.style.color = '#fca5a5';
+                alertDiv.style.borderColor = '#b91c1c';
+                alertDiv.style.display = 'block';
             });
         }
     </script>
